@@ -1,0 +1,41 @@
+{
+  "name": "kmap-solver",
+  "version": "0.0.1",
+  "description": "",
+  "main": "./bin/index.js",
+  "bin": {
+    "kmap-solver": "./bin/index.js",
+    "obsfx@kmap-solver": "./bin/index.js"
+  },
+  "scripts": {
+    "run": "DEV=true ts-node ./src/index.tsx",
+    "run-dt": "npx react-devtools",
+    "inspect": "node --inspect -r ts-node/register ./src/index.tsx",
+    "build": "tsc -b",
+    "watch": "tsc -b --watch",
+    "standalone": "pkg -t node14-linux-x64,node14-macos-x64,node14-win-x64 . --out-path ./standalone-executables"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/obsfx/kmap-solver.git"
+  },
+  "author": "Ömercan Balandı",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/obsfx/kmap-solver/issues"
+  },
+  "homepage": "https://github.com/obsfx/kmap-solver#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.10",
+    "@types/react": "^17.0.0",
+    "pkg": "^4.4.9",
+    "react-devtools": "^4.10.0",
+    "ts-node": "^9.1.0",
+    "typescript": "^4.1.2"
+  },
+  "dependencies": {
+    "commander": "^6.2.0",
+    "ink": "^3.0.8",
+    "react": "^17.0.1"
+  }
+}
