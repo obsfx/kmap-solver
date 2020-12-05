@@ -13,45 +13,7 @@ if (typeof cl.variables != 'string' || ( typeof cl.minterms != 'string' && typeo
   console.log('Please specify minterms or maxterms');
 }
 
-const grayCodesForVars: string[][][] = [
-  // 2
-  [ 
-    [ '0', '1' ], 
-    [ '0', '1' ] 
-  ],
-  // 3
-  [ 
-    [ '00', '01', '11', '10' ], 
-    [ '0', '1' ] 
-  ],
-  // 4
-  [ 
-    [ '00', '01', '11', '10' ], 
-    [ '00', '01', '11', '10' ], 
-  ],
-]
 
 const variables: string[] = cl.variables.trim().split(',');
 const terms: number[] = cl.minterms.trim().split(',').map((str: string) => Number(str));
 
-const [ rows, cols ]= grayCodesForVars[variables.length - 2];
-
-let map: number[][] = [];
-let map2: number[][] = [];
-
-for (let i: number = 0; i < rows.length; i++) {
-  map.push([]);
-  map2.push([]);
-
-  for (let j: number = 0; j < cols.length; j++) {
-    let idx = parseInt(`${rows[i]}${cols[j]}`, 2);
-    map[i][j] = idx;
-    map2[i][j] = terms.indexOf(idx) > -1 ? 1 : 0;
-  }
-}
-
-console.log(variables, terms);
-console.log('---------------');
-console.log(map);
-console.log('---------------');
-console.log(map2);
