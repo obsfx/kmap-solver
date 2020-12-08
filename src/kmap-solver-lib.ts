@@ -73,7 +73,7 @@ export const group = (decimal: number, KMap: KMapCell[][]): KMapCell[] => {
 
   const { row, col } = findDecimalPos(decimal, KMap);
 
-  const regions: { w: number, h: number }[] = [];
+  let regions: { w: number, h: number }[] = [];
 
   for (let w: number = 1; w <= colCount; w = w*2) {
     for (let h: number = 1; h <= rowCount; h = h*2) {
@@ -92,15 +92,34 @@ export const group = (decimal: number, KMap: KMapCell[][]): KMapCell[] => {
 
       if (w > h) {
         regions.push({ w: -w, h });
+
+        if (h != 1) {
+          regions.push({ w: w, h: -h });
+          regions.push({ w: -w, h: -h });
+        }
+
         continue;
       }
 
       if (w < h) {
         regions.push({ w, h: -h });
+
+        if (w != 1) {
+          regions.push({ w: -w, h: h });
+          regions.push({ w: -w, h: -h });
+        }
+
         continue;
       }
     }
   }
+
+  regions = regions.sort((a, b) => {
+    let area_a: number = Math.abs(a.w * a.h);
+    let area_b: number = Math.abs(b.w * b.h);
+
+    return area_a - area_b;
+  });
 
   //console.log(regions);
 
