@@ -1,4 +1,4 @@
-export type KMapGrayCode = {
+type KMapGrayCode = {
   rows: string[];
   cols: string[];
 }
@@ -6,8 +6,8 @@ export type KMapGrayCode = {
 export type KMapCell = {
   binary: string;
   decimal: number;
-  value: boolean;
   row: number;
+  col: number;
 }
 
 const KMapGrayCodes: Map<number, KMapGrayCode> = new Map([
@@ -31,7 +31,17 @@ const KMapGrayCodes: Map<number, KMapGrayCode> = new Map([
   ]
 ]);
 
-export const getKMap = (variables: string[], terms: number[]): KMapCell[][] => {
+type Region = {
+  w: number;
+  h: number;
+}
+
+export type KMapResult = {
+  groups: KMapCell[][];
+  expression: string;
+}
+
+const getKMap = (variables: string[]): KMapCell[][] => {
  let KMap: KMapCell[][] = []; 
 
  const grayCodes: KMapGrayCode | undefined = KMapGrayCodes.get(variables.length);
@@ -46,9 +56,8 @@ export const getKMap = (variables: string[], terms: number[]): KMapCell[][] => {
    for (let col: number = 0; col < cols.length; col++) {
      const binary: string = `${rows[row]}${cols[col]}`;
      const decimal: number = parseInt(binary, 2);
-     const value: boolean = terms.indexOf(decimal) > -1;
 
-     KMap[row].push({ binary, decimal, value, row });
+     KMap[row].push({ binary, decimal, row, col });
    }
  }
 
@@ -65,15 +74,8 @@ const findDecimalPos = (decimal: number, KMap: KMapCell[][]): { row: number, col
   return { row: 0, col: 0 };
 }
 
-export const group = (decimal: number, KMap: KMapCell[][]): KMapCell[] => {
-  //Number.isInteger(Math.log2(16))
-
-  const rowCount: number = KMap.length;
-  const colCount: number = KMap[0].length;
-
-  const { row, col } = findDecimalPos(decimal, KMap);
-
-  let regions: { w: number, h: number }[] = [];
+const generateRegions = (rowCount: number, colCount: number): Region[] => {
+  let regions: Region[] = [];
 
   for (let w: number = 1; w <= colCount; w = w*2) {
     for (let h: number = 1; h <= rowCount; h = h*2) {
@@ -114,21 +116,26 @@ export const group = (decimal: number, KMap: KMapCell[][]): KMapCell[] => {
     }
   }
 
-  regions = regions.sort((a, b) => {
+  return regions.sort((a, b) => {
     let area_a: number = Math.abs(a.w * a.h);
     let area_b: number = Math.abs(b.w * b.h);
 
     return area_a - area_b;
   });
+}
 
-  //console.log(regions);
+const group = (decimal: number, terms: number[], KMap: KMapCell[][]): KMapCell[] => {
+  const rowCount: number = KMap.length;
+  const colCount: number = KMap[0].length;
+
+  const { row, col } = findDecimalPos(decimal, KMap);
+
+  const regions: Region[] = generateRegions(rowCount, colCount);
 
   const checkRegion = (w: number, h: number): KMapCell[] | false => {
     const cells: KMapCell[] = [];
 
     let r: number = 0;
-
-    debugger;
 
     while (r != h) {
       const curRow: number = (row + r) % rowCount >= 0 ? 
@@ -138,21 +145,18 @@ export const group = (decimal: number, KMap: KMapCell[][]): KMapCell[] => {
       let c: number = 0;
 
       while (c != w) {
-        //console.log('kekw', r, c, w, h);
         const curCol: number = (col + c) % colCount >= 0 ?
           (col + c) % colCount :
           colCount + ((col + c) % colCount);
 
-        if (!KMap[curRow][curCol].value) return false;
+        if (terms.indexOf(KMap[curRow][curCol].decimal) == -1) return false;
 
         cells.push(KMap[curRow][curCol]);
 
-        if (w < 0) c--;
-        else c++;
+        w < 0 ? c-- : c++;
       }
 
-      if (h < 0) r--;
-      else r++;
+      h < 0 ? r-- : r++;
     }
 
     return cells;
@@ -161,8 +165,6 @@ export const group = (decimal: number, KMap: KMapCell[][]): KMapCell[] => {
   for (let i: number = regions.length - 1; i > -1; i--) {
     const { w, h } = regions[i];
 
-    //console.log('----', w, h)
-
     const cells: KMapCell[] | false = checkRegion(w, h);
 
     if (cells) return cells;
@@ -170,3 +172,69 @@ export const group = (decimal: number, KMap: KMapCell[][]): KMapCell[] => {
 
   return [ KMap[row][col] ];
 }
+
+const extract = (variables: string[], group: KMapCell[]): string => {
+  let buffer: string[] = group[0].binary.split('');
+  let expression: string = '';
+
+  for (let i: number = 1; i < group.length; i++) {
+    const binary: string[] = group[i].binary.split('');
+
+    for (let j: number = 0; j < binary.length; j++) {
+      if (binary[j] != buffer[j]) buffer[j] = 'X';
+    }
+  }
+
+  for (let i: number = 0; i < buffer.length; i++) {
+    const value: string = buffer[i];
+
+    if (value != 'X') {
+      expression += value == '0' ? `${variables[i]}'` : `${variables[i]}`; 
+    }
+  }
+
+  return expression;
+}
+
+const solve = (variables: string[], minterms: number[], dontcares: number[] = []): KMapResult => {
+  const KMap: KMapCell[][] = getKMap(variables);
+
+  const groups: KMapCell[][] = [];
+  const expressions: string[] = [];
+
+  let termQueue: number[] = [ ...minterms ];
+
+  while (termQueue.length > 0) {
+    const term = termQueue[0];
+
+    if (term < 0 || term > variables.length * variables.length - 1) {
+      termQueue = termQueue.filter((_term: number) => _term != term);
+      continue;
+    }
+
+    let cells: KMapCell[] = group(term, minterms, KMap);
+
+    if (dontcares.length > 0) {
+      const dc_cells: KMapCell[] = group(term, [...minterms, ...dontcares], KMap);
+      if (dc_cells.length > cells.length) cells = dc_cells;
+    }
+
+    groups.push(cells);
+
+    cells.map((cell: KMapCell) => {
+      termQueue = termQueue.filter((_term: number) => _term != cell.decimal);
+    });
+
+    const expression: string = extract(variables, cells);
+    expressions.push(expression);
+  }
+
+  const total_expression: string = expressions.join(' + ');
+
+  return {
+    groups,
+    expression: total_expression == '' ? '1' : expressions.join(' + ')
+  }
+}
+
+export default solve;
