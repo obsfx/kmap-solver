@@ -1,19 +1,29 @@
 {
   "name": "kmap-solver",
   "version": "0.0.1",
-  "description": "",
+  "description": "A command line tool to solve and visualize Karnaugh Maps up to 4 variables",
   "main": "./bin/index.js",
   "bin": {
     "kmap-solver": "./bin/index.js",
     "obsfx@kmap-solver": "./bin/index.js"
   },
+  "keywords": [
+    "karnaugh",
+    "map",
+    "visualize",
+    "tool",
+    "typescript",
+    "command",
+    "line",
+    "cli",
+    "solver"
+  ],
   "scripts": {
     "run": "DEV=true ts-node ./src/index.tsx",
     "run-dt": "npx react-devtools",
     "inspect": "node --inspect -r ts-node/register ./src/index.tsx",
     "build": "tsc -b",
-    "watch": "tsc -b --watch",
-    "standalone": "pkg -t node14-linux-x64,node14-macos-x64,node14-win-x64 . --out-path ./standalone-executables"
+    "watch": "tsc -b --watch"
   },
   "repository": {
     "type": "git",
@@ -27,13 +37,13 @@
   "homepage": "https://github.com/obsfx/kmap-solver#readme",
   "devDependencies": {
     "@types/node": "^14.14.10",
-    "pkg": "^4.4.9",
     "ts-node": "^9.1.0",
     "typescript": "^4.1.2"
   },
   "dependencies": {
     "cli-table3": "^0.6.0",
     "colors": "^1.4.0",
-    "commander": "^6.2.0"
+    "commander": "^6.2.0",
+    "kmap-solver-lib": "0.0.1"
   }
 }

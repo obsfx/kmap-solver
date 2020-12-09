@@ -1,7 +1,7 @@
 import commander, { Command } from 'commander';
 import colors from 'colors/safe';
 import Table, { HorizontalTableRow } from 'cli-table3';
-import solve, { KMapCell, KMapGrayCode, KMapGrayCodes } from './kmap-solver-lib';
+import { solve, KMapCell, KMapGrayCode, KMapGrayCodes } from 'kmap-solver-lib';
 
 const cl: commander.Command = new Command();
 
@@ -20,6 +20,11 @@ const variables: string[] = cl.variables ?
 
 if (variables.length == 0) {
   console.error(colors.red('You didn\'t specify any variable'));
+  process.exit(1);
+}
+
+if (variables.length > 4) {
+  console.error(colors.red('kmap-solver supports up to 4 variables'));
   process.exit(1);
 }
 
@@ -147,4 +152,4 @@ for (let i: number = 0; i < groups.length; i++) {
   console.log(` ${text_c(i, `GROUP${i + 1}`)} (${mterms})`);
 }
 console.log(colors.grey(' ────────────────────────────'));
-console.log(` ${colors.inverse(colors.white(' RESULT: '))} ${colors.green(colors.bold(expression))}`);
+console.log(` ${colors.inverse(colors.white(' RESULT: '))} ${colors.bold(`f(${variables.join(',')})`)} = ${expression.split('+').map((ex: string, i: number) => text_c(i, ex)).join('+')}`);
