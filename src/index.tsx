@@ -29,8 +29,6 @@ const terms: number[] = cl.minterms ?
   .split(',')
   .map((str: string) => Number(str.trim())) : [];
 
-console.log();
-
 if (terms.length == 0) {
   console.error('You didn\'t specify any minterm');
   process.exit(1);
@@ -55,22 +53,21 @@ const { rows, cols } = grayCodes;
 const decimals: number[] = [];
 groups.forEach((group: KMapCell[]) => group.forEach((cell: KMapCell) => decimals.push(cell.decimal)))
 
-// instantiate
 const table = new Table({
   chars: { 
-    'top': '', 
+    'top': '─', 
     'top-mid': '', 
-    'top-left': '', 
-    'top-right': '', 
-    'bottom': '', 
+    'top-left': ' ┌─', 
+    'top-right': '─┐', 
+    'bottom': '─', 
     'bottom-mid': '', 
-    'bottom-left': '', 
-    'bottom-right': '',
-    'left': '',
+    'bottom-left': ' └─', 
+    'bottom-right': '─┘',
+    'left': ' │ ',
     'left-mid': '', 
     'mid': '', 
     'mid-mid': '', 
-    'right': '', 
+    'right': ' │', 
     'right-mid': '', 
     'middle': ''
   },
@@ -84,7 +81,7 @@ const table = new Table({
 const data: HorizontalTableRow[] = [];
 
 const text_c = (i: number, str: string): string => {
-  const fns = [
+  const colorfn: string[] = [
     colors.green(str),
     colors.cyan(str),
     colors.yellow(str),
@@ -92,11 +89,11 @@ const text_c = (i: number, str: string): string => {
     colors.red(str)
   ]
 
-  return fns[i] || colors.dim(str);
+  return colorfn[i] || colors.dim(str);
 }
 
 for (let r: number = 0; r < rows.length; r++) {
-  data.push([ rows[r] ]);
+  data.push([ `${rows[r]} ` ]);
 
   for (let c: number = 0; c < cols.length; c++) {
     let state: string = colors.gray(' 0 ');
@@ -125,11 +122,12 @@ for (let r: number = 0; r < groups.length; r++) {
 
 table.push(...data);
 
-console.log(table.toString());
-
-console.log(colors.grey('────────────────────────────'));
+console.log('');
+console.log(` ${colors.inverse(colors.white(' kmap-solver '))}`)
+console.log(` ${colors.gray('github.com/obsfx/kmap-solver')}`)
+console.log(colors.grey(' ────────────────────────────'));
 console.log(` ${colors.bold(`f(${variables.join(',')})`)} = ${terms.join(',')}`);
-console.log(colors.grey('────────────────────────────'));
+console.log(table.toString());
 
 for (let i: number = 0; i < groups.length; i++) {
   let mterms: string = ``;
@@ -148,5 +146,5 @@ for (let i: number = 0; i < groups.length; i++) {
 
   console.log(` ${text_c(i, `GROUP${i + 1}`)} (${mterms})`);
 }
-console.log(colors.grey('────────────────────────────'));
-console.log(`${colors.inverse(colors.white('RESULT:'))} ${colors.cyan(colors.bold(expression))}`);
+console.log(colors.grey(' ────────────────────────────'));
+console.log(` ${colors.inverse(colors.white(' RESULT: '))} ${colors.green(colors.bold(expression))}`);
