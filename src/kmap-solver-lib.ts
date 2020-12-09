@@ -1,4 +1,4 @@
-type KMapGrayCode = {
+export type KMapGrayCode = {
   rows: string[];
   cols: string[];
 }
@@ -10,7 +10,7 @@ export type KMapCell = {
   col: number;
 }
 
-const KMapGrayCodes: Map<number, KMapGrayCode> = new Map([
+export const KMapGrayCodes: Map<number, KMapGrayCode> = new Map([
   [ 
     2, {
       rows: [ '0', '1' ], 
