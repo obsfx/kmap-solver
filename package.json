@@ -1,6 +1,6 @@
 {
   "name": "kmap-solver",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A command line tool to solve and visualize Karnaugh Maps up to 4 variables",
   "main": "./bin/index.js",
   "bin": {
