@@ -44,6 +44,6 @@
     "cli-table3": "^0.6.0",
     "colors": "^1.4.0",
     "commander": "^6.2.0",
-    "kmap-solver-lib": "0.0.3"
+    "kmap-solver-lib": "0.0.4"
   }
 }
